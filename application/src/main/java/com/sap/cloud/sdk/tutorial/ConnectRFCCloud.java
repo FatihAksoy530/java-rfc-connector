@@ -6,6 +6,8 @@ import com.sap.cloud.sdk.cloudplatform.connectivity.DestinationAccessor;
 import com.sap.cloud.sdk.s4hana.connectivity.exception.RequestExecutionException;
 import com.sap.cloud.sdk.s4hana.connectivity.rfc.RfmRequest;
 import com.sap.cloud.sdk.s4hana.connectivity.rfc.RfmRequestResult;
+import com.sap.cloud.sdk.s4hana.connectivity.rfc.RemoteFunctionCache;
+import com.sap.cloud.sdk.s4hana.connectivity.rfc.exception.RemoteFunctionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,31 +38,46 @@ import java.io.IOException;
 
 @WebServlet("/ConnectivityRFCCloud")
 public class ConnectRFCCloud extends HttpServlet {
-    public static final long serialVersionUID = 1L;
-    public static final Logger logger = LoggerFactory.getLogger(ConnectRFCCloud.class);
-    public static final Destination destinationRfc =
+    private static final long serialVersionUID = 1L;
+    private static final Logger logger = LoggerFactory.getLogger(ConnectRFCCloud.class);
+    private static final Destination destinationRfc =
             DestinationAccessor.getDestination("sapuretestrfc");
 
     @Override
-    public void doGet(final HttpServletRequest request, final HttpServletResponse response)
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException {
 
         logger.info("Start get method: " + request.getRequestURI());
+        try {
+            RemoteFunctionCache.clearCache(destinationRfc);
+        } catch (RemoteFunctionException e) {
+            e.printStackTrace();
+        }
         String parameter = request.getParameter("name");
         logger.info("Get parameter 'name': " + parameter);
-        if (parameter == null) {
-            parameter = "STFC_CONNECTION";
-        }
+//        if (parameter == null) {
+//            parameter = "USER_NAME_GET";
+//        }
         Iterable names = destinationRfc.getPropertyNames();
         logger.info(new Gson().toJson(names));
 
         try {
-            final RfmRequestResult rfmTest = new RfmRequest(parameter, false).withChanging("REQUTEXT" ,"STRING", "JCO successful").execute(destinationRfc); //false is for non-commit
+            // call RfmRequest with parameters
+            RfmRequestResult result = new RfmRequest("RFC_READ_TABLE")
+                    .withExporting("QUERY_TABLE","DD02L-TABNAME","AGR_1252")
+                    .withTable("OPTIONS","RFC_DB_OPT").end()
+                    .withTable("FIELDS","RFC_DB_FLD").end()
+                    .withTable("DATA","TAB512").end()
+                    .withTableAsReturn("DATA","TAB512")
+                    .execute(destinationRfc);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(new Gson().toJson(rfmTest));
+            response.getWriter().write(String.valueOf(result.getResultElements()));
         } catch (RequestExecutionException e) {
             e.printStackTrace();
+            // send stack trace to client in response body as text
+            response.setContentType("text/plain");
+            response.getWriter().write(e.getMessage());
         }
     }
 }

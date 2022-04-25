@@ -44,23 +44,32 @@ public class ConnectRFCLocal extends HttpServlet {
     @Override
     public void doGet(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException {
-
+        logger.info("dir_name: " + System.getProperty("user.dir"));
         logger.info("Start get method: " + request.getRequestURI());
         String parameter = request.getParameter("name");
         logger.info("Get parameter 'name': " + parameter);
-        if (parameter == null) {
-            parameter = "STFC_CONNECTION";
-        }
+//        if (parameter == null) {
+//            parameter = "STFC_CONNECTION";
+//        }
         Iterable names = destinationRfc.getPropertyNames();
         logger.info(new Gson().toJson(names));
 
         try {
-            final RfmRequestResult rfmTest = new RfmRequest(parameter, false).withChanging("REQUTEXT" ,"STRING", "JCO successful").execute(destinationRfc); //false is for non-commit
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(new Gson().toJson(rfmTest));
+                // call RfmRequest with parameters
+                RfmRequestResult result = new RfmRequest("RFC_READ_TABLE")
+                        .withExporting("QUERY_TABLE","DD02L-TABNAME","AGR_1252")
+                        .withTable("OPTIONS","RFC_DB_OPT").end()
+                        .withTable("FIELDS","RFC_DB_FLD").end()
+                        .withTableAsReturn("DATA","TAB512")
+                        .execute(destinationRfc);
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write(new Gson().toJson(result));
         } catch (RequestExecutionException e) {
             e.printStackTrace();
+            // send stack trace to client in response body as text
+            response.setContentType("text/plain");
+            response.getWriter().write(e.getMessage());
         }
     }
 }
