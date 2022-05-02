@@ -46,7 +46,8 @@ public class ConnectRFCCloud extends HttpServlet {
     @Override
     protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException {
-
+        // print VCAP_SERVICES environment variable
+        logger.info("VCAP_SERVICES: {}", System.getenv("VCAP_SERVICES"));
         logger.info("Start get method: " + request.getRequestURI());
         try {
             RemoteFunctionCache.clearCache(destinationRfc);

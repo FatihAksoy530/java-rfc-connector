@@ -45,6 +45,20 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.apache.tomee.maven</groupId>
+                    <artifactId>tomee-maven-plugin</artifactId>
+                    <version>8.0.10</version>
+                    <configuration>
+                        <args>-Djco.destinations.dir=C:/Users/Fatih/Desktop/jco_destinations</args>
+                        <tomeeClassifier>webprofile</tomeeClassifier>
+                        <context>ROOT</context>
+                        <libs>
+                            <lib>remove:slf4j-jdk14</lib>
+                        </libs>
+                        <tomeeShutdownPort>8006</tomeeShutdownPort>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-pmd-plugin</artifactId>
                     <version>3.16.0</version>
