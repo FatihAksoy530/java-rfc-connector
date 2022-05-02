@@ -47,21 +47,20 @@ public class ConnectRFCCloud extends HttpServlet {
     protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException {
         // print VCAP_SERVICES environment variable
-        logger.info("VCAP_SERVICES: {}", System.getenv("VCAP_SERVICES"));
+//        logger.info("VCAP_SERVICES: {}", System.getenv("VCAP_SERVICES"));
         logger.info("Start get method: " + request.getRequestURI());
-        try {
-            RemoteFunctionCache.clearCache(destinationRfc);
-        } catch (RemoteFunctionException e) {
-            e.printStackTrace();
-        }
-        String parameter = request.getParameter("name");
-        logger.info("Get parameter 'name': " + parameter);
+//        try {
+//            RemoteFunctionCache.clearCache(destinationRfc);
+//        } catch (RemoteFunctionException e) {
+//            e.printStackTrace();
+//        }
+//        String parameter = request.getParameter("name");
+//        logger.info("Get parameter 'name': " + parameter);
 //        if (parameter == null) {
 //            parameter = "USER_NAME_GET";
 //        }
-        Iterable names = destinationRfc.getPropertyNames();
-        logger.info(new Gson().toJson(names));
-
+//        Iterable names = destinationRfc.getPropertyNames();
+//        logger.info("DESTINATION PARAMETERS:",new Gson().toJson(names));
         try {
             // call RfmRequest with parameters
             RfmRequestResult result = new RfmRequest("RFC_READ_TABLE")
@@ -71,10 +70,11 @@ public class ConnectRFCCloud extends HttpServlet {
                     .withTable("DATA","TAB512").end()
                     .withTableAsReturn("DATA","TAB512")
                     .execute(destinationRfc);
+            logger.info("Request sent to ABAP system");
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(String.valueOf(result.getResultElements()));
-        } catch (RequestExecutionException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             // send stack trace to client in response body as text
             response.setContentType("text/plain");

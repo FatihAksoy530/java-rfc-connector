@@ -57,11 +57,11 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>com.sap.conn.jco</groupId>
-            <artifactId>com.sap.conn.jco.sapjco3</artifactId>
-            <version>3.1.5</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.sap.conn.jco</groupId>-->
+<!--            <artifactId>com.sap.conn.jco.sapjco3</artifactId>-->
+<!--            <version>3.1.5</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.sap.cloud.sdk.cloudplatform</groupId>
             <artifactId>scp-cf</artifactId>
@@ -133,20 +133,6 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.tomee.maven</groupId>
-                <artifactId>tomee-maven-plugin</artifactId>
-                <version>8.0.10</version>
-                <configuration>
-                    <args>-Djco.destinations.dir=C:/Users/Fatih/Desktop/jco_destinations</args>
-                    <tomeeClassifier>webprofile</tomeeClassifier>
-                    <context>ROOT</context>
-                    <libs>
-                        <lib>remove:slf4j-jdk14</lib>
-                    </libs>
-                    <tomeeShutdownPort>8006</tomeeShutdownPort>
-                </configuration>
-            </plugin>
 
             <plugin>
                 <groupId>com.sap.cloud.sdk.plugins</groupId>
