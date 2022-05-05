@@ -11,7 +11,7 @@ applications:
       - sap_java_buildpack
     env:
 #      USE_JCO: true
-      TARGET_RUNTIME: tomee7
+      TARGET_RUNTIME: tomcat
       SET_LOGGING_LEVEL: '{ROOT: INFO, com.sap.cloud.sdk: INFO}'
       JBP_CONFIG_SAPJVM_MEMORY_SIZES: 'metaspace:128m..'
     services:

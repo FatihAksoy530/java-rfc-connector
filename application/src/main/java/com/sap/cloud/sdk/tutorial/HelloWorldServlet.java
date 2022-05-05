@@ -21,7 +21,8 @@ public class HelloWorldServlet extends HttpServlet
     public void doGet( final HttpServletRequest request, final HttpServletResponse response )
         throws IOException
     {
-        logger.info("VCAP_SERVICES: {}", System.getenv("VCAP_SERVICES"));
+        String a = "Hello World";
+        // print Djco.destinations.dir environment variable
         logger.info("I am running!");
         response.getWriter().write("Hello World extra!a");
     }
