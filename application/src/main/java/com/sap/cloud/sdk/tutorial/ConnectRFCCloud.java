@@ -43,7 +43,7 @@ import java.util.List;
  */
 
 
-@WebServlet("/ConnectivityRFCCloud")
+@WebServlet("/profile_parameters")
 public class ConnectRFCCloud extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(ConnectRFCCloud.class);
@@ -59,7 +59,7 @@ public class ConnectRFCCloud extends HttpServlet {
         ProfileParametersQueries ppq = new ProfileParametersQueries();
         ppq.deleteParameters(company_subdomain);
         for (int i = 0; i < resultElements.size(); i++) {
-            if (i == 1000) {
+            if (i == 10) {
                 break;
             }
             GsonResultObject gsonResultObject = (GsonResultObject) resultElements.get(i);
@@ -95,7 +95,8 @@ public class ConnectRFCCloud extends HttpServlet {
             response.setCharacterEncoding("UTF-8");
             // write result
             this.uploadParameters(result, company_subdomain);
-            response.getWriter().write("Data uploaded successfully.");
+            // return json scucces message
+            response.getWriter().write("{\"status\":\"success\"}");
         } catch (Exception e) {
             e.printStackTrace();
             // send stack trace to client in response body as text
