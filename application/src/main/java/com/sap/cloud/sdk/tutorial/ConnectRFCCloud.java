@@ -47,8 +47,6 @@ import java.util.List;
 public class ConnectRFCCloud extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(ConnectRFCCloud.class);
-    private static final Destination destinationRfc =
-            DestinationAccessor.getDestination("sapuretestrfc");
 
     public void uploadParameters(RfmRequestResult result, String company_subdomain) throws RemoteFunctionException {
         // get elements as a list from result
@@ -76,32 +74,38 @@ public class ConnectRFCCloud extends HttpServlet {
             throws IOException {
         logger.info("Start get method: " + request.getRequestURI());
         // get company_subdomain from request query string
-        String company_subdomain = request.getParameter("company_subdomain");
-        if (company_subdomain == null) {
-            company_subdomain = "sapuretest";
-        }
 
-        try {
-            // call RfmRequest with parameters
-            RfmRequestResult result = new RfmRequest("PFL_GET_SERVER_PARAM_VALUES")
+
+            // get destinationName from request query string
+            String destination_name = request.getParameter("destination_name");
+
+            Destination destinationRfc =
+                    DestinationAccessor.getDestination(destination_name);
+            try {
+                // call RfmRequest with parameters
+                RfmRequestResult result = new RfmRequest("PFL_GET_SERVER_PARAM_VALUES")
 //                    .withExporting("QUERY_TABLE","DD02L-TABNAME","AGR_1252")
 //                    .withTable("OPTIONS","RFC_DB_OPT").end()
 //                    .withTable("FIELDS","RFC_DB_FLD").end()
 //                    .withTable("DATA","TAB512").end()
 //                    .withTableAsReturn("DATA","TAB512")
-                    .execute(destinationRfc);
-            logger.info("Request sent to ABAP system");
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            // write result
-            this.uploadParameters(result, company_subdomain);
-            // return json scucces message
-            response.getWriter().write("{\"status\":\"success\"}");
-        } catch (Exception e) {
-            e.printStackTrace();
-            // send stack trace to client in response body as text
-            response.setContentType("text/plain");
-            response.getWriter().write(e.getMessage());
-        }
+                        .execute(destinationRfc);
+                logger.info("Request sent to ABAP system");
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                // write result
+                this.uploadParameters(result, "sapuretestcloud");
+                // return json scucces message
+                response.getWriter().write("{\"status\":\"success\"}");
+            } catch (Exception e) {
+                e.printStackTrace();
+                // send stack trace to client in response body as text
+                response.setContentType("text/plain");
+                try {
+                    response.getWriter().write(e.getMessage());
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
     }
 }

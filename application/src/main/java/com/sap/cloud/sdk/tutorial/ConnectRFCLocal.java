@@ -1,8 +1,7 @@
 package com.sap.cloud.sdk.tutorial;
 
 import com.google.gson.Gson;
-import com.sap.cloud.sdk.cloudplatform.connectivity.Destination;
-import com.sap.cloud.sdk.cloudplatform.connectivity.DestinationAccessor;
+import com.sap.cloud.sdk.cloudplatform.connectivity.*;
 import com.sap.cloud.sdk.result.DefaultResultCollection;
 import com.sap.cloud.sdk.result.GsonResultObject;
 import com.sap.cloud.sdk.result.ResultElement;
@@ -13,9 +12,12 @@ import com.sap.cloud.sdk.s4hana.connectivity.rfc.RfmRequestResult;
 import com.sap.cloud.sdk.s4hana.connectivity.rfc.RemoteFunctionCache;
 import com.sap.cloud.sdk.s4hana.connectivity.rfc.exception.RemoteFunctionException;
 import com.google.gson.JsonObject;
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sap.cloud.security.token.SecurityContext;
+import com.sap.cloud.security.token.Token;
 import javax.servlet.annotation.HttpConstraint;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
@@ -47,8 +49,6 @@ import java.util.List;
 public class ConnectRFCLocal extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(ConnectRFCCloud.class);
-    private static final Destination destinationRfc =
-            DestinationAccessor.getDestination("sapuretestrfc");
 
     public void uploadParameters(RfmRequestResult result, String company_subdomain) throws RemoteFunctionException {
         // get elements as a list from result
@@ -81,27 +81,63 @@ public class ConnectRFCLocal extends HttpServlet {
             company_subdomain = "sapuretest";
         }
 
-        try {
-            // call RfmRequest with parameters
-            RfmRequestResult result = new RfmRequest("PFL_GET_SERVER_PARAM_VALUES")
+//        Token token = SecurityContext.getToken();
+
+        String finalCompany_subdomain = company_subdomain;
+        Thread runThread = new Thread(() -> {
+//            SecurityContext.setToken(token);
+            try {
+//                DestinationOptions options =
+//                        DestinationOptions
+//                                .builder()
+//                                .augmentBuilder(
+//                                        ScpCfDestinationOptionsAugmenter
+//                                                .augmenter()
+//                                                .retrievalStrategy(ScpCfDestinationRetrievalStrategy.CURRENT_TENANT))
+//                                .build();
+
+                Destination destinationRfc = DestinationAccessor.getDestination("tenant_dest");;
+//                Try<Destination> tryGetDestination = DestinationAccessor.getLoader().tryGetDestination("tenant_dest", options);
+                // get destination from tryGetDestination
+//                Destination destinationRfc = tryGetDestination.get();
+                // call RfmRequest with parameters
+                RfmRequestResult result = new RfmRequest("PFL_GET_SERVER_PARAM_VALUES")
 //                    .withExporting("QUERY_TABLE","DD02L-TABNAME","AGR_1252")
 //                    .withTable("OPTIONS","RFC_DB_OPT").end()
 //                    .withTable("FIELDS","RFC_DB_FLD").end()
 //                    .withTable("DATA","TAB512").end()
 //                    .withTableAsReturn("DATA","TAB512")
-                    .execute(destinationRfc);
-            logger.info("Request sent to ABAP system");
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            // write result
-            this.uploadParameters(result, company_subdomain);
-            // return json scucces message
-            response.getWriter().write("{\"status\":\"success\"}");
-        } catch (Exception e) {
+                        .execute(destinationRfc);
+                logger.info("Request sent to ABAP system");
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                // write result
+                this.uploadParameters(result, finalCompany_subdomain);
+                // return json scucces message
+                response.getWriter().write("{\"status\":\"success\"}");
+            } catch (Exception e) {
+                e.printStackTrace();
+                // send stack trace to client in response body as text
+                response.setContentType("text/plain");
+                try {
+                    response.getWriter().write(e.getMessage());
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+//            finally {
+//                // after execution clear the token again
+//                SecurityContext.clearToken();
+//            }
+
+        });
+        runThread.start();
+
+        // wait to be finished
+        try {
+            runThread.join();
+        } catch (InterruptedException e) {
             e.printStackTrace();
-            // send stack trace to client in response body as text
-            response.setContentType("text/plain");
-            response.getWriter().write(e.getMessage());
         }
     }
 }
