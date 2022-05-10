@@ -3,8 +3,8 @@ applications:
 
   - name: sapurezero-java-api
     routes:
-      - route: sapurezero-java-api.cfapps.us10.hana.ondemand.com
-    memory: 4500M
+      - route: sapurezero-java-api.cfapps.eu20.hana.ondemand.com
+    memory: 1500M
     timeout: 300
     path: application/target/firstapp-application.war
     buildpacks:
